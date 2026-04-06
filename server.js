@@ -4,12 +4,22 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+// Use Render’s dynamic port instead of hardcoding 3000
+const PORT = process.env.PORT || 3000;
+
 const PROD_DB = path.join(__dirname, 'products.json');
 const SALES_DB = path.join(__dirname, 'sales.json');
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files (like index.html, CSS, JS)
+app.use(express.static(path.join(__dirname)));
+
+// Default route to load index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 function initDB() {
     if (!fs.existsSync(PROD_DB)) fs.writeFileSync(PROD_DB, JSON.stringify([], null, 2));
