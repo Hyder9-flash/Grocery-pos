@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "name": "Organic Milk 1L",
+    "price": 65,
+    "stock": 40,
+    "img": "https://cdn-icons-png.flaticon.com/128/372/372971.png"
+  },
+  {
+    "id": 2,
+    "name": "Basmati Rice 5kg",
+    "price": 450,
+    "stock": 22,
+    "img": "https://cdn-icons-png.flaticon.com/128/4090/4090434.png"
+  },
+  {
+    "id": 3,
+    "name": "Sunflower Oil 1L",
+    "price": 180,
+    "stock": 13,
+    "img": "https://cdn-icons-png.flaticon.com/128/305/305018.png"
+  },
+  {
+    "id": 4,
+    "name": "Brown Eggs 12pc",
+    "price": 90,
+    "stock": 96,
+    "img": "https://cdn-icons-png.flaticon.com/128/837/837165.png"
+  },
+  {
+    "name": "BREAD",
+    "price": 44,
+    "stock": 97,
+    "img": "https://cdn-icons-png.flaticon.com/128/679/679821.png",
+    "id": 5
+  },
+  {
+    "name": "CO-COLA",
+    "price": 50,
+    "stock": 3,
+    "img": "",
+    "id": 1775470920204
+  }
+]

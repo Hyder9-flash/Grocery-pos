@@ -1,0 +1,184 @@
+[
+  {
+    "invoiceID": "INV-77720",
+    "date": "6/4/2026, 4:42:25 pm",
+    "customer": "riyaz",
+    "mobile": "9700813035",
+    "items": [
+      {
+        "name": "CO-COLA",
+        "price": 50,
+        "qty": 6
+      }
+    ],
+    "subtotal": "₹300.00",
+    "tax": "₹54.00",
+    "grandTotal": "₹354.00"
+  },
+  {
+    "invoiceID": "INV-37879",
+    "date": "6/4/2026, 3:58:37 pm",
+    "customer": "hyder",
+    "mobile": "+91 7416712437",
+    "items": [
+      {
+        "name": "Organic Milk 1L",
+        "price": 65,
+        "qty": 3
+      },
+      {
+        "name": "Basmati Rice 5kg",
+        "price": 450,
+        "qty": 1
+      },
+      {
+        "name": "Sunflower Oil 1L",
+        "price": 180,
+        "qty": 1
+      },
+      {
+        "name": "BREAD",
+        "price": 44,
+        "qty": 2
+      },
+      {
+        "name": "CO-COLA",
+        "price": 50,
+        "qty": 1
+      },
+      {
+        "name": "Brown Eggs 12pc",
+        "price": 90,
+        "qty": 1
+      }
+    ],
+    "subtotal": "₹1053.00",
+    "tax": "₹189.54",
+    "grandTotal": "₹1242.54"
+  },
+  {
+    "invoiceID": "INV-3409",
+    "date": "6/4/2026, 3:51:08 pm",
+    "customer": "FLASH",
+    "mobile": "+91 8074937260",
+    "items": [
+      {
+        "name": "Basmati Rice 5kg",
+        "price": 450,
+        "qty": 1
+      },
+      {
+        "name": "Sunflower Oil 1L",
+        "price": 180,
+        "qty": 1
+      },
+      {
+        "name": "Brown Eggs 12pc",
+        "price": 90,
+        "qty": 1
+      },
+      {
+        "name": "BREAD",
+        "price": 44,
+        "qty": 1
+      }
+    ],
+    "grandTotal": "₹901.52"
+  },
+  {
+    "invoiceID": "INV-7372",
+    "date": "6/4/2026, 3:48:41 pm",
+    "customer": "aneeq",
+    "mobile": "+91 2324345353",
+    "items": [
+      {
+        "name": "Organic Milk 1L",
+        "price": 65,
+        "qty": 1
+      },
+      {
+        "name": "Basmati Rice 5kg",
+        "price": 450,
+        "qty": 1
+      }
+    ],
+    "grandTotal": "₹607.70"
+  },
+  {
+    "invoiceID": "INV25781",
+    "date": "6/4/2026, 3:42:05 pm",
+    "customer": "ANEEQ ",
+    "mobile": "+91 7213122324",
+    "items": [
+      {
+        "name": "Organic Milk 1L",
+        "price": 65,
+        "qty": 1
+      },
+      {
+        "name": "Basmati Rice 5kg",
+        "price": 450,
+        "qty": 1
+      },
+      {
+        "name": "Sunflower Oil 1L",
+        "price": 180,
+        "qty": 1
+      }
+    ],
+    "grandTotal": "₹820.10"
+  },
+  {
+    "invoiceID": "INV79382",
+    "date": "6/4/2026, 3:34:39 pm",
+    "customer": "ANEEQ",
+    "mobile": "+91 7661934926",
+    "items": [
+      {
+        "name": "Organic Milk 1L",
+        "price": 65,
+        "qty": 2
+      },
+      {
+        "name": "Basmati Rice 5kg",
+        "price": 450,
+        "qty": 2
+      },
+      {
+        "name": "Sunflower Oil 1L",
+        "price": 180,
+        "qty": 2
+      },
+      {
+        "name": "Brown Eggs 12pc",
+        "price": 90,
+        "qty": 1
+      }
+    ],
+    "grandTotal": "₹1746.40"
+  },
+  {
+    "invoiceID": "INV00031",
+    "date": "6/4/2026, 3:31:40 pm",
+    "customer": "Walk-in Customer",
+    "mobile": "N/A",
+    "items": [
+      {
+        "name": "Organic Milk 1L",
+        "price": 65,
+        "qty": 2
+      },
+      {
+        "name": "Basmati Rice 5kg",
+        "price": 450,
+        "qty": 1
+      },
+      {
+        "name": "Sunflower Oil 1L",
+        "price": 180,
+        "qty": 1
+      }
+    ],
+    "grandTotal": "₹896.80"
+  }
+]

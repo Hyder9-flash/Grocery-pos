@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshMart Pro | Ultimate Billing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+
+        /* PRINT LOGIC */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; margin: 0; }
+            .print-container { display: block !important; width: 100% !important; border: none !important; box-shadow: none !important; }
+            @page { size: auto; margin: 5mm; }
+        }
+
+        .report-only { display: none; }
+        @media print {
+            .report-only { display: block !important; }
+        }
+
+        .btn-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b sticky top-0 z-40 no-print">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white rotate-3 group-hover:rotate-12 transition">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h1 class="text-2xl font-black tracking-tighter">FRESHMART <span class="text-emerald-600 font-light underline decoration-slate-300">SYSTEM</span></h1>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="toggleModal('invModal', true)" class="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold text-sm btn-hover">Add Item</button>
+                <button onclick="openHistory()" class="bg-white border-2 border-slate-100 text-slate-700 px-6 py-2.5 rounded-xl font-bold text-sm btn-hover">Sales History</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Inventory Sidebar -->
+        <div class="lg:col-span-1 no-print">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-[calc(100vh-140px)] flex flex-col">
+                <h3 class="font-bold text-lg mb-4 flex justify-between items-center">
+                    Inventory 
+                    <span id="dbStatus" class="text-[10px] bg-red-100 text-red-500 px-2 py-1 rounded">OFFLINE</span>
+                </h3>
+                <div id="productGrid" class="space-y-3 overflow-y-auto pr-2 custom-scroll flex-1">
+                    <!-- Products -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing Area -->
+        <div class="lg:col-span-2 print-container">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden">
+                <div id="billHeader" class="bg-slate-900 p-10 text-white">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span id="editModeLabel" class="hidden bg-yellow-400 text-black text-[10px] px-2 py-0.5 rounded font-black mb-3 uppercase">Editing Mode</span>
+                            <h2 class="text-4xl font-black italic tracking-tighter">TAX INVOICE</h2>
+                            <p id="invIDDisplay" class="text-slate-500 text-xs mt-2 uppercase font-bold tracking-widest italic underline decoration-emerald-500">New Sale Session</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-emerald-500 font-black">FRESHMART RETAIL</p>
+                            <p class="text-[10px] text-slate-500 uppercase mt-1">Reg No: 123456789<br>Maharashtra, India</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10 no-print">
+                        <input type="text" id="cName" placeholder="Customer Name" class="bg-slate-800 border-none p-4 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <input type="text" id="cMobile" placeholder="Phone Number" class="bg-slate-800 border-none p-4 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                </div>
+
+                <div class="p-10">
+                    <table class="w-full text-left">
+                        <thead class="text-[10px] uppercase text-slate-400 border-b font-black tracking-widest">
+                            <tr><th class="pb-6">Item Description</th><th class="pb-6 text-center">Qty</th><th class="pb-6 text-right">Price</th><th class="pb-6 text-right">Total</th><th class="pb-6 no-print"></th></tr>
+                        </thead>
+                        <tbody id="cartTable" class="text-sm font-medium"></tbody>
+                    </table>
+
+                    <div id="emptyMsg" class="py-20 text-center text-slate-300 italic flex flex-col items-center gap-2">
+                        <i class="fas fa-shopping-basket text-4xl opacity-20"></i>
+                        <p>Scanning items...</p>
+                    </div>
+
+                    <div class="mt-10 border-t-2 border-slate-50 pt-8 space-y-3">
+                        <div class="flex justify-between text-slate-400 text-sm"><span>Subtotal</span><span id="subTotal">₹0.00</span></div>
+                        <div class="flex justify-between text-slate-400 text-sm"><span>GST (18%)</span><span id="taxTotal">₹0.00</span></div>
+                        <div class="flex justify-between text-4xl font-black pt-6">
+                            <span>TOTAL</span>
+                            <span id="grandTotal" class="text-emerald-600 tracking-tighter">₹0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 flex gap-4 no-print">
+                        <button onclick="resetBill()" class="bg-slate-100 text-slate-400 px-8 py-5 rounded-3xl hover:bg-red-50 hover:text-red-600 transition font-bold"><i class="fas fa-sync-alt"></i></button>
+                        <button onclick="saveAndPrint()" class="flex-1 bg-emerald-600 text-white font-black py-5 rounded-3xl shadow-xl shadow-emerald-200 text-lg btn-hover flex items-center justify-center gap-3">
+                            <i class="fas fa-print"></i> COMPLETE & PRINT BILL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Inventory -->
+    <div id="invModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl">
+            <h2 class="text-3xl font-black mb-8 italic">New Stock</h2>
+            <div class="space-y-4">
+                <input type="text" id="pName" placeholder="Item Name" class="w-full bg-slate-50 p-4 rounded-2xl outline-none border border-slate-100">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="pPrice" placeholder="Price (₹)" class="w-full bg-slate-50 p-4 rounded-2xl outline-none border border-slate-100">
+                    <input type="number" id="pStock" placeholder="Stock" class="w-full bg-slate-50 p-4 rounded-2xl outline-none border border-slate-100">
+                </div>
+                <input type="text" id="pImg" placeholder="Icon URL (e.g. Flaticon)" class="w-full bg-slate-50 p-4 rounded-2xl outline-none border border-slate-100">
+                <button onclick="addInventory()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black mt-4">Update Store</button>
+                <button onclick="toggleModal('invModal', false)" class="w-full text-slate-400 font-bold py-2">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: History -->
+    <div id="historyModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-[3rem] w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-10 border-b flex justify-between items-center bg-slate-50">
+                <div>
+                    <h2 class="text-3xl font-black">Sales Dashboard</h2>
+                    <p class="text-slate-500 text-sm">Full history of your store transactions</p>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="printFullHistory()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-sm btn-hover">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i> Print Sales Report
+                    </button>
+                    <button onclick="toggleModal('historyModal', false)" class="text-4xl font-light">&times;</button>
+                </div>
+            </div>
+            <div id="historyContent" class="p-10 overflow-y-auto space-y-4 flex-1 custom-scroll">
+                <!-- Sales List -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Sales Report -->
+    <div id="salesReportArea" class="report-only p-10">
+        <h1 class="text-2xl font-black mb-2">FRESHMART SALES REPORT</h1>
+        <p id="reportDate" class="text-sm mb-8"></p>
+        <table class="w-full text-left border-collapse border border-slate-200">
+            <thead>
+                <tr class="bg-slate-100">
+                    <th class="border p-2">Invoice</th>
+                    <th class="border p-2">Customer</th>
+                    <th class="border p-2">Items</th>
+                    <th class="border p-2">Total Amount</th>
+                </tr>
+            </thead>
+            <tbody id="reportTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const API = "http://localhost:3000/api";
+        let cart = [];
+        let isEdit = false;
+        let currentInvID = null;
+
+        // Load Products
+        async function loadStore() {
+            try {
+                const res = await fetch(`${API}/products`);
+                const prods = await res.json();
+                document.getElementById('dbStatus').innerText = "LIVE DB";
+                document.getElementById('dbStatus').classList.replace('bg-red-100', 'bg-emerald-100');
+                document.getElementById('dbStatus').classList.replace('text-red-500', 'text-emerald-500');
+                
+                document.getElementById('productGrid').innerHTML = prods.map(p => `
+                    <div onclick="addToCart('${p.name}', ${p.price})" class="bg-white border-2 border-slate-50 p-4 rounded-3xl flex justify-between items-center cursor-pointer hover:border-emerald-200 transition shadow-sm group">
+                        <div class="flex items-center gap-4">
+                            <img src="${p.img || 'https://cdn-icons-png.flaticon.com/128/679/679821.png'}" class="w-12 h-12 object-contain group-hover:scale-110 transition">
+                            <div><p class="font-black text-slate-700 text-sm">${p.name}</p><p class="text-[10px] font-bold text-slate-400">STOCK: ${p.stock} | ₹${p.price}</p></div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition"><i class="fas fa-plus text-xs"></i></div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error("Database Connection Failed"); }
+        }
+
+        function addToCart(name, price) {
+            const item = cart.find(i => i.name === name);
+            if(item) item.qty++; else cart.push({name, price, qty: 1});
+            renderCart();
+        }
+
+        function renderCart() {
+            const table = document.getElementById('cartTable');
+            document.getElementById('emptyMsg').style.display = cart.length ? 'none' : 'block';
+            let sub = 0;
+            table.innerHTML = cart.map((item, idx) => {
+                const total = item.price * item.qty;
+                sub += total;
+                return `
+                <tr class="border-b border-slate-50">
+                    <td class="py-6 font-black text-slate-700 underline decoration-slate-200">${item.name}</td>
+                    <td class="text-center font-black bg-slate-50 rounded-xl">${item.qty}</td>
+                    <td class="text-right text-slate-400">₹${item.price}</td>
+                    <td class="text-right font-black">₹${total.toFixed(2)}</td>
+                    <td class="text-right no-print"><button onclick="cart.splice(${idx}, 1); renderCart()" class="text-slate-300 hover:text-red-500 ml-4"><i class="fas fa-minus-circle"></i></button></td>
+                </tr>`;
+            }).join('');
+            
+            const tax = sub * 0.18;
+            document.getElementById('subTotal').innerText = `₹${sub.toFixed(2)}`;
+            document.getElementById('taxTotal').innerText = `₹${tax.toFixed(2)}`;
+            document.getElementById('grandTotal').innerText = `₹${(sub + tax).toFixed(2)}`;
+        }
+
+        async function saveAndPrint() {
+            if(!cart.length) return alert("Add items to bill first!");
+            
+            const payload = {
+                invoiceID: currentInvID,
+                customer: document.getElementById('cName').value || "CASH CUSTOMER",
+                mobile: document.getElementById('cMobile').value || "N/A",
+                items: cart,
+                subtotal: document.getElementById('subTotal').innerText,
+                tax: document.getElementById('taxTotal').innerText,
+                grandTotal: document.getElementById('grandTotal').innerText,
+                isEdit
+            };
+
+            const res = await fetch(`${API}/checkout`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const data = await res.json();
+            
+            // UI setup for printing
+            document.getElementById('invIDDisplay').innerText = data.invoiceID;
+            setTimeout(() => {
+                window.print();
+                resetBill();
+                loadStore();
+            }, 500);
+        }
+
+        async function openHistory() {
+            const res = await fetch(`${API}/sales`);
+            const sales = await res.json();
+            toggleModal('historyModal', true);
+            document.getElementById('historyContent').innerHTML = sales.map(s => `
+                <div class="bg-white p-8 rounded-3xl border flex justify-between items-center shadow-sm hover:border-emerald-200 transition">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-black text-emerald-600 tracking-tighter">${s.invoiceID}</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${s.date}</span>
+                        </div>
+                        <p class="text-sm font-medium text-slate-600">Client: <span class="text-slate-900">${s.customer}</span> • ${s.mobile}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl font-black mr-6">${s.grandTotal}</span>
+                        <button onclick="editSale('${s.invoiceID}')" class="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-bold">Edit</button>
+                        <button onclick="deleteSale('${s.invoiceID}')" class="bg-red-50 text-red-600 px-5 py-2 rounded-xl text-xs font-bold">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function printFullHistory() {
+            const res = await fetch(`${API}/sales`);
+            const sales = await res.json();
+            const reportTable = document.getElementById('reportTable');
+            document.getElementById('reportDate').innerText = "Generated on: " + new Date().toLocaleString();
+            
+            reportTable.innerHTML = sales.map(s => `
+                <tr>
+                    <td class="border p-2">${s.invoiceID}</td>
+                    <td class="border p-2">${s.customer}</td>
+                    <td class="border p-2 text-xs">${s.items.map(i => i.name + ' x'+i.qty).join(', ')}</td>
+                    <td class="border p-2 font-bold">${s.grandTotal}</td>
+                </tr>
+            `).join('');
+            
+            window.print();
+        }
+
+        async function editSale(id) {
+            const res = await fetch(`${API}/sales`);
+            const sales = await res.json();
+            const s = sales.find(x => x.invoiceID === id);
+            isEdit = true;
+            currentInvID = id;
+            cart = s.items;
+            document.getElementById('cName').value = s.customer;
+            document.getElementById('cMobile').value = s.mobile;
+            document.getElementById('editModeLabel').classList.remove('hidden');
+            renderCart();
+            toggleModal('historyModal', false);
+        }
+
+        async function deleteSale(id) {
+            if(!confirm("Delete this invoice forever?")) return;
+            await fetch(`${API}/sales/${id}`, { method: 'DELETE' });
+            openHistory();
+        }
+
+        async function addInventory() {
+            const payload = {
+                name: document.getElementById('pName').value,
+                price: parseFloat(document.getElementById('pPrice').value),
+                stock: parseInt(document.getElementById('pStock').value),
+                img: document.getElementById('pImg').value
+            };
+            await fetch(`${API}/inventory`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            toggleModal('invModal', false);
+            loadStore();
+        }
+
+        function resetBill() {
+            isEdit = false;
+            currentInvID = null;
+            cart = [];
+            document.getElementById('cName').value = "";
+            document.getElementById('cMobile').value = "";
+            document.getElementById('editModeLabel').classList.add('hidden');
+            document.getElementById('invIDDisplay').innerText = "New Sale Session";
+            renderCart();
+        }
+
+        function toggleModal(id, show) { document.getElementById(id).style.display = show ? 'flex' : 'none'; }
+        loadStore();
+    </script>
+</body>
+</html>
