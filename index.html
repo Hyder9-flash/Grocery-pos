@@ -170,173 +170,174 @@
         </table>
     </div>
 
-    <script>
-        const API = "http://localhost:3000/api";
-        let cart = [];
-        let isEdit = false;
-        let currentInvID = null;
+<script>
+    // ✅ Fixed API constant
+    const API = "/api";  
 
-        // Load Products
-        async function loadStore() {
-            try {
-                const res = await fetch(`${API}/products`);
-                const prods = await res.json();
-                document.getElementById('dbStatus').innerText = "LIVE DB";
-                document.getElementById('dbStatus').classList.replace('bg-red-100', 'bg-emerald-100');
-                document.getElementById('dbStatus').classList.replace('text-red-500', 'text-emerald-500');
-                
-                document.getElementById('productGrid').innerHTML = prods.map(p => `
-                    <div onclick="addToCart('${p.name}', ${p.price})" class="bg-white border-2 border-slate-50 p-4 rounded-3xl flex justify-between items-center cursor-pointer hover:border-emerald-200 transition shadow-sm group">
-                        <div class="flex items-center gap-4">
-                            <img src="${p.img || 'https://cdn-icons-png.flaticon.com/128/679/679821.png'}" class="w-12 h-12 object-contain group-hover:scale-110 transition">
-                            <div><p class="font-black text-slate-700 text-sm">${p.name}</p><p class="text-[10px] font-bold text-slate-400">STOCK: ${p.stock} | ₹${p.price}</p></div>
-                        </div>
-                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition"><i class="fas fa-plus text-xs"></i></div>
-                    </div>
-                `).join('');
-            } catch (e) { console.error("Database Connection Failed"); }
-        }
+    let cart = [];
+    let isEdit = false;         
+    let currentInvID = null;
 
-        function addToCart(name, price) {
-            const item = cart.find(i => i.name === name);
-            if(item) item.qty++; else cart.push({name, price, qty: 1});
-            renderCart();
-        }
-
-        function renderCart() {
-            const table = document.getElementById('cartTable');
-            document.getElementById('emptyMsg').style.display = cart.length ? 'none' : 'block';
-            let sub = 0;
-            table.innerHTML = cart.map((item, idx) => {
-                const total = item.price * item.qty;
-                sub += total;
-                return `
-                <tr class="border-b border-slate-50">
-                    <td class="py-6 font-black text-slate-700 underline decoration-slate-200">${item.name}</td>
-                    <td class="text-center font-black bg-slate-50 rounded-xl">${item.qty}</td>
-                    <td class="text-right text-slate-400">₹${item.price}</td>
-                    <td class="text-right font-black">₹${total.toFixed(2)}</td>
-                    <td class="text-right no-print"><button onclick="cart.splice(${idx}, 1); renderCart()" class="text-slate-300 hover:text-red-500 ml-4"><i class="fas fa-minus-circle"></i></button></td>
-                </tr>`;
-            }).join('');
+    // Load Products
+    async function loadStore() {
+        try {
+            const res = await fetch(`${API}/products`);
+            const prods = await res.json();
+            document.getElementById('dbStatus').innerText = "LIVE DB";
+            document.getElementById('dbStatus').classList.replace('bg-red-100', 'bg-emerald-100');
+            document.getElementById('dbStatus').classList.replace('text-red-500', 'text-emerald-500');
             
-            const tax = sub * 0.18;
-            document.getElementById('subTotal').innerText = `₹${sub.toFixed(2)}`;
-            document.getElementById('taxTotal').innerText = `₹${tax.toFixed(2)}`;
-            document.getElementById('grandTotal').innerText = `₹${(sub + tax).toFixed(2)}`;
-        }
-
-        async function saveAndPrint() {
-            if(!cart.length) return alert("Add items to bill first!");
-            
-            const payload = {
-                invoiceID: currentInvID,
-                customer: document.getElementById('cName').value || "CASH CUSTOMER",
-                mobile: document.getElementById('cMobile').value || "N/A",
-                items: cart,
-                subtotal: document.getElementById('subTotal').innerText,
-                tax: document.getElementById('taxTotal').innerText,
-                grandTotal: document.getElementById('grandTotal').innerText,
-                isEdit
-            };
-
-            const res = await fetch(`${API}/checkout`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            const data = await res.json();
-            
-            // UI setup for printing
-            document.getElementById('invIDDisplay').innerText = data.invoiceID;
-            setTimeout(() => {
-                window.print();
-                resetBill();
-                loadStore();
-            }, 500);
-        }
-
-        async function openHistory() {
-            const res = await fetch(`${API}/sales`);
-            const sales = await res.json();
-            toggleModal('historyModal', true);
-            document.getElementById('historyContent').innerHTML = sales.map(s => `
-                <div class="bg-white p-8 rounded-3xl border flex justify-between items-center shadow-sm hover:border-emerald-200 transition">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="font-black text-emerald-600 tracking-tighter">${s.invoiceID}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${s.date}</span>
-                        </div>
-                        <p class="text-sm font-medium text-slate-600">Client: <span class="text-slate-900">${s.customer}</span> • ${s.mobile}</p>
-                    </div>
+            document.getElementById('productGrid').innerHTML = prods.map(p => `
+                <div onclick="addToCart('${p.name}', ${p.price})" class="bg-white border-2 border-slate-50 p-4 rounded-3xl flex justify-between items-center cursor-pointer hover:border-emerald-200 transition shadow-sm group">
                     <div class="flex items-center gap-4">
-                        <span class="text-2xl font-black mr-6">${s.grandTotal}</span>
-                        <button onclick="editSale('${s.invoiceID}')" class="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-bold">Edit</button>
-                        <button onclick="deleteSale('${s.invoiceID}')" class="bg-red-50 text-red-600 px-5 py-2 rounded-xl text-xs font-bold">Delete</button>
+                        <img src="${p.img || 'https://cdn-icons-png.flaticon.com/128/679/679821.png'}" class="w-12 h-12 object-contain group-hover:scale-110 transition">
+                        <div><p class="font-black text-slate-700 text-sm">${p.name}</p><p class="text-[10px] font-bold text-slate-400">STOCK: ${p.stock} | ₹${p.price}</p></div>
                     </div>
+                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition"><i class="fas fa-plus text-xs"></i></div>
                 </div>
             `).join('');
-        }
+        } catch (e) { console.error("Database Connection Failed"); }
+    }
 
-        async function printFullHistory() {
-            const res = await fetch(`${API}/sales`);
-            const sales = await res.json();
-            const reportTable = document.getElementById('reportTable');
-            document.getElementById('reportDate').innerText = "Generated on: " + new Date().toLocaleString();
-            
-            reportTable.innerHTML = sales.map(s => `
-                <tr>
-                    <td class="border p-2">${s.invoiceID}</td>
-                    <td class="border p-2">${s.customer}</td>
-                    <td class="border p-2 text-xs">${s.items.map(i => i.name + ' x'+i.qty).join(', ')}</td>
-                    <td class="border p-2 font-bold">${s.grandTotal}</td>
-                </tr>
-            `).join('');
-            
+    function addToCart(name, price) {
+        const item = cart.find(i => i.name === name);
+        if(item) item.qty++; else cart.push({name, price, qty: 1});
+        renderCart();
+    }
+
+    function renderCart() {
+        const table = document.getElementById('cartTable');
+        document.getElementById('emptyMsg').style.display = cart.length ? 'none' : 'block';
+        let sub = 0;
+        table.innerHTML = cart.map((item, idx) => {
+            const total = item.price * item.qty;
+            sub += total;
+            return `
+            <tr class="border-b border-slate-50">
+                <td class="py-6 font-black text-slate-700 underline decoration-slate-200">${item.name}</td>
+                <td class="text-center font-black bg-slate-50 rounded-xl">${item.qty}</td>
+                <td class="text-right text-slate-400">₹${item.price}</td>
+                <td class="text-right font-black">₹${total.toFixed(2)}</td>
+                <td class="text-right no-print"><button onclick="cart.splice(${idx}, 1); renderCart()" class="text-slate-300 hover:text-red-500 ml-4"><i class="fas fa-minus-circle"></i></button></td>
+            </tr>`;
+        }).join('');
+        
+        const tax = sub * 0.18;
+        document.getElementById('subTotal').innerText = `₹${sub.toFixed(2)}`;
+        document.getElementById('taxTotal').innerText = `₹${tax.toFixed(2)}`;
+        document.getElementById('grandTotal').innerText = `₹${(sub + tax).toFixed(2)}`;
+    }
+
+    async function saveAndPrint() {
+        if(!cart.length) return alert("Add items to bill first!");
+        
+        const payload = {
+            invoiceID: currentInvID,
+            customer: document.getElementById('cName').value || "CASH CUSTOMER",
+            mobile: document.getElementById('cMobile').value || "N/A",
+            items: cart,
+            subtotal: document.getElementById('subTotal').innerText,
+            tax: document.getElementById('taxTotal').innerText,
+            grandTotal: document.getElementById('grandTotal').innerText,
+            isEdit
+        };
+
+        const res = await fetch(`${API}/checkout`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        const data = await res.json();
+        
+        document.getElementById('invIDDisplay').innerText = data.invoiceID;
+        setTimeout(() => {
             window.print();
-        }
-
-        async function editSale(id) {
-            const res = await fetch(`${API}/sales`);
-            const sales = await res.json();
-            const s = sales.find(x => x.invoiceID === id);
-            isEdit = true;
-            currentInvID = id;
-            cart = s.items;
-            document.getElementById('cName').value = s.customer;
-            document.getElementById('cMobile').value = s.mobile;
-            document.getElementById('editModeLabel').classList.remove('hidden');
-            renderCart();
-            toggleModal('historyModal', false);
-        }
-
-        async function deleteSale(id) {
-            if(!confirm("Delete this invoice forever?")) return;
-            await fetch(`${API}/sales/${id}`, { method: 'DELETE' });
-            openHistory();
-        }
-
-        async function addInventory() {
-            const payload = {
-                name: document.getElementById('pName').value,
-                price: parseFloat(document.getElementById('pPrice').value),
-                stock: parseInt(document.getElementById('pStock').value),
-                img: document.getElementById('pImg').value
-            };
-            await fetch(`${API}/inventory`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            toggleModal('invModal', false);
+            resetBill();
             loadStore();
-        }
+        }, 500);
+    }
 
-        function resetBill() {
-            isEdit = false;
-            currentInvID = null;
-            cart = [];
-            document.getElementById('cName').value = "";
-            document.getElementById('cMobile').value = "";
-            document.getElementById('editModeLabel').classList.add('hidden');
-            document.getElementById('invIDDisplay').innerText = "New Sale Session";
-            renderCart();
-        }
+    async function openHistory() {
+        const res = await fetch(`${API}/sales`);
+        const sales = await res.json();
+        toggleModal('historyModal', true);
+        document.getElementById('historyContent').innerHTML = sales.map(s => `
+            <div class="bg-white p-8 rounded-3xl border flex justify-between items-center shadow-sm hover:border-emerald-200 transition">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-black text-emerald-600 tracking-tighter">${s.invoiceID}</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${s.date}</span>
+                    </div>
+                    <p class="text-sm font-medium text-slate-600">Client: <span class="text-slate-900">${s.customer}</span> • ${s.mobile}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-2xl font-black mr-6">${s.grandTotal}</span>
+                    <button onclick="editSale('${s.invoiceID}')" class="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-bold">Edit</button>
+                    <button onclick="deleteSale('${s.invoiceID}')" class="bg-red-50 text-red-600 px-5 py-2 rounded-xl text-xs font-bold">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-        function toggleModal(id, show) { document.getElementById(id).style.display = show ? 'flex' : 'none'; }
+    async function printFullHistory() {
+        const res = await fetch(`${API}/sales`);
+        const sales = await res.json();
+        const reportTable = document.getElementById('reportTable');
+        document.getElementById('reportDate').innerText = "Generated on: " + new Date().toLocaleString();
+        
+        reportTable.innerHTML = sales.map(s => `
+            <tr>
+                <td class="border p-2">${s.invoiceID}</td>
+                <td class="border p-2">${s.customer}</td>
+                <td class="border p-2 text-xs">${s.items.map(i => i.name + ' x'+i.qty).join(', ')}</td>
+                <td class="border p-2 font-bold">${s.grandTotal}</td>
+            </tr>
+        `).join('');
+        
+        window.print();
+    }
+
+    async function editSale(id) {
+        const res = await fetch(`${API}/sales`);
+        const sales = await res.json();
+        const s = sales.find(x => x.invoiceID === id);
+        isEdit = true;
+        currentInvID = id;
+        cart = s.items;
+        document.getElementById('cName').value = s.customer;
+        document.getElementById('cMobile').value = s.mobile;
+        document.getElementById('editModeLabel').classList.remove('hidden');
+        renderCart();
+        toggleModal('historyModal', false);
+    }
+
+    async function deleteSale(id) {
+        if(!confirm("Delete this invoice forever?")) return;
+        await fetch(`${API}/sales/${id}`, { method: 'DELETE' });
+        openHistory();
+    }
+
+    async function addInventory() {
+        const payload = {
+            name: document.getElementById('pName').value,
+            price: parseFloat(document.getElementById('pPrice').value),
+            stock: parseInt(document.getElementById('pStock').value),
+            img: document.getElementById('pImg').value
+        };
+        await fetch(`${API}/inventory`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        toggleModal('invModal', false);
         loadStore();
-    </script>
+    }
+
+    function resetBill() {
+        isEdit = false;
+        currentInvID = null;
+        cart = [];
+        document.getElementById('cName').value = "";
+        document.getElementById('cMobile').value = "";
+        document.getElementById('editModeLabel').classList.add('hidden');
+        document.getElementById('invIDDisplay').innerText = "New Sale Session";
+        renderCart();
+    }
+
+    function toggleModal(id, show) { document.getElementById(id).style.display = show ? 'flex' : 'none'; }
+    loadStore();
+</script>
 </body>
 </html>
